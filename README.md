@@ -22,6 +22,7 @@ Không đưa môi trường `.venv` hoặc dữ liệu cá nhân lên repo.
 
 - 30 ngày, hai lịch dòng tiền: đúng hạn và bất lợi.
 - Có thể thêm, sửa, xóa từng khoản thu/chi và ngày phát sinh ở cả hai lịch ngay trên giao diện. Bấm vào ô để sửa; nhập vào dòng trống cuối bảng để thêm; chọn dòng và nhấn Delete để xóa. Dữ liệu chỉ giữ trong phiên ứng dụng, không ghi ra file.
+- Sau khi chỉnh tham số và lịch thu chi, bấm **Chạy mô phỏng** để cập nhật kết quả. Khi chưa bấm, ứng dụng giữ kết quả của lần chạy trước và báo rằng có thay đổi chưa áp dụng.
 - Khoản dự phòng `R = max(R_user, số_ngày_dự_phòng × chi_thiết_yếu/ngày)`.
 - `B_min` là số dư thấp nhất trong **cả hai** lịch dòng tiền.
 - Khoản tích lũy `S = min(max(0, B_min - R), giới_hạn_mỗi_lần, mục_tiêu_còn_thiếu, số_dư_nguồn)`.

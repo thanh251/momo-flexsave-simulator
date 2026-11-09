@@ -159,6 +159,12 @@ with st.sidebar:
     cap = money_input("Giới hạn tích lũy mỗi lần (đ)", 900_000, "cap")
     remaining_goal = money_input("Phần mục tiêu còn thiếu (đ)", 2_000_000, "remaining_goal")
     actual_stress = st.toggle("Dòng tiền thực tế là kịch bản bất lợi", value=True)
+    essential_reserve = int(essential_daily) * int(reserve_days)
+    preview_reserve = reserve_amount(int(user_reserve), int(essential_daily), int(reserve_days))
+    st.markdown(f"**Dự phòng theo thiết lập: {vnd(preview_reserve)}**")
+    st.caption(f"Lấy mức cao hơn giữa dự phòng bạn chọn ({vnd(user_reserve)}) và "
+               f"chi thiết yếu ({vnd(essential_daily)} × {reserve_days} ngày = "
+               f"{vnd(essential_reserve)}).")
     st.caption("Nhập 1000000 hoặc 1.000.000; sau khi nhấn Enter hoặc rời ô, số tiền sẽ có dấu chấm. Lịch thu chi được chỉnh ở hai bảng bên dưới.")
 
 st.subheader("Chỉnh lịch thu chi")
@@ -182,9 +188,37 @@ scenario = Scenario(base.name, int(opening), expected_income, stress_income,
                     expected_expense, stress_expense, base.history_net_per_day,
                     base.description)
 reserve = reserve_amount(int(user_reserve), int(essential_daily), int(reserve_days))
-rec, paths, metrics = compare(scenario, reserve, int(cap), int(remaining_goal), actual_stress)
+current_inputs = (scenario, int(user_reserve), int(essential_daily), int(reserve_days),
+                  int(cap), int(remaining_goal), actual_stress)
+run_pressed = st.button("Chạy mô phỏng", type="primary")
+if run_pressed or "simulation_result" not in st.session_state:
+    rec, paths, metrics = compare(scenario, reserve, int(cap), int(remaining_goal), actual_stress)
+    st.session_state["simulation_result"] = {
+        "inputs": current_inputs,
+        "scenario": scenario,
+        "reserve": reserve,
+        "cap": int(cap),
+        "remaining_goal": int(remaining_goal),
+        "rec": rec,
+        "paths": paths,
+        "metrics": metrics,
+    }
 
-st.info(base.description + " Bạn có thể sửa toàn bộ lịch thu chi ở hai bảng phía trên.")
+result = st.session_state["simulation_result"]
+if current_inputs != result["inputs"]:
+    st.warning("Bạn đã thay đổi tham số hoặc lịch thu chi. Kết quả bên dưới vẫn thuộc lần chạy trước; "
+               "nhấn **Chạy mô phỏng** để áp dụng toàn bộ thay đổi.")
+else:
+    st.caption("Kết quả đã được tính từ toàn bộ tham số và hai lịch thu chi đang hiển thị.")
+
+scenario = result["scenario"]
+reserve = result["reserve"]
+cap = result["cap"]
+remaining_goal = result["remaining_goal"]
+opening = scenario.opening
+rec, paths, metrics = result["rec"], result["paths"], result["metrics"]
+
+st.info(scenario.description + " Bạn có thể sửa toàn bộ lịch thu chi ở hai bảng phía trên.")
 st.subheader("Đánh giá khuyến nghị")
 low_point = lowest_balance_context(scenario, rec["minimum"])
 if rec["preexisting_shortfall"]:
